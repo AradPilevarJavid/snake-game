@@ -12,3 +12,4 @@ __pycache__/
 # Tone
 assets/tone.wav
 
+scores.json
