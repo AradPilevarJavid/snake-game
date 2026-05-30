@@ -19,7 +19,8 @@ A classic Snake game built with Python and Pygame. It includes single and two-pl
 - Python 3.x
 - Pygame
 
-Install dependencies:
+## Install dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
