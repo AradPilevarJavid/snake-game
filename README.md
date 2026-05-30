@@ -1,4 +1,4 @@
-# Snake Game
+# Snake Game 🐍
 
 A classic Snake game built with Python and Pygame. It includes single and two-player modes, selectable difficulty, mystery power-ups, procedurally generated sound, and a persistent scoreboard.
 
