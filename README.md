@@ -31,7 +31,7 @@ pip install -r requirements.txt
 python src/main.py
 ```
 
--move with WASD for single player and WASD and arrows for two player
+- move with WASD for single player and WASD and arrows for two player
 - P: pause / resume
 - Esc: return to the menu
 - Enter: continue and submit your score after game over
