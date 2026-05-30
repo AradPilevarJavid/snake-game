@@ -1,0 +1,14 @@
+# Virtual environment
+snakeVenv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# IDE / editor files (optional)
+.vscode/
+*.code-workspace
+
+# Tone
+assets/tone.wav
+
