@@ -47,7 +47,7 @@ Menu:
 
 ## Project Structure
 
-
+`
 ├── assets
 │   └── scores.json
 ├── src
@@ -59,3 +59,4 @@ Menu:
 │   └── ui.py
 ├── README.md
 └── requirements.txt
+`
