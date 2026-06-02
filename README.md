@@ -45,7 +45,7 @@ Menu:
 - S: scoreboard
 - Q: quit
 
-## Project Structure
+## 📁Project Structure
 
 ```
 ├── assets
