@@ -5,11 +5,15 @@ snakeVenv/
 __pycache__/
 *.pyc
 
+# temp .py files
+main_1.py
+main_2.py
+
 # IDE / editor files (optional)
 .vscode/
 *.code-workspace
 
-# Tone
+# Tone and assets
 assets/tone.wav
-
+assets/scores.json
 scores.json
