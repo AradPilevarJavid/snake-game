@@ -60,3 +60,5 @@ Menu:
 ├── README.md
 └── requirements.txt
 ```
+## Roadmap
+- [ ] add player vs AI
