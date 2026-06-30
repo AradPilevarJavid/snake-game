@@ -62,3 +62,5 @@ Menu:
 ```
 ## Roadmap
 - [ ] add player vs AI
+- [ ] make the window responsive
+- [ ] more elaborate and beautiful scoreboard
