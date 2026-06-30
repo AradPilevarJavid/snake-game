@@ -21,9 +21,9 @@ A classic Snake game built with Python and Pygame. It includes single and two-pl
 
 ## Install dependencies:
 
-```bash
+````bash
 pip install -r requirements.txt
-```
+````
 
 ## Running
 
