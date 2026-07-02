@@ -61,6 +61,5 @@ Menu:
 └── requirements.txt
 ```
 ## Roadmap
-- [ ] add player vs AI
-- [ ] make the window responsive
-- [ ] more elaborate and beautiful scoreboard
+- [x] add player vs AI
+- [x] more elaborate and beautiful scoreboard
