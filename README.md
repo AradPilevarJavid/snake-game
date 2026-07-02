@@ -1,8 +1,6 @@
-Here's the emojified version of your `README.md`, with tasteful emojis added to headings and feature descriptions to make it more lively, without altering any content or structure.
-
 # 🐍 Snake Game
 
-A classic Snake game built with Python and Pygame.  
+Have fun playing a classic Snake game built with Python and Pygame.  
 It includes single‑player, two‑player, **Player vs AI** modes, selectable difficulty, smart AI options, mystery power‑ups, procedurally generated sound, and a persistent scoreboard.
 
 ## ✨ Features
@@ -72,7 +70,7 @@ In the scoreboard, click **Return** or press **Esc** to go back.
 ├── LICENSE
 ├── README.md
 ├── assets/
-│   └── tone.wav          (optional – not required)
+│   └── tone.wav
 ├── scores.json
 ├── requirements.txt
 └── src/
