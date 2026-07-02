@@ -103,7 +103,8 @@ class Renderer:
         pygame.draw.rect(self.screen, COLORS["info_bar_bg"], bar_rect)
         y_offset = 10
         for i, snake in enumerate(game.snakes):
-            text = f"P{i+1} Score: {snake.score}"
+            label = f"{game.ai_name} AI" if getattr(game, "ai_enabled", False) and i == 1 else f"P{i+1}"
+            text = f"{label} Score: {snake.score}"
             color = snake.current_color_head(current_time) if snake.alive else (150, 150, 150)
             surf = self.font_medium.render(text, True, color)
             self.screen.blit(surf, (10, y_offset))
@@ -128,7 +129,16 @@ class Renderer:
         overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 180))
         self.screen.blit(overlay, (0, 0))
-        if game.win:
+        if game.winner == "tie":
+            msg = "TIE!"
+            color = (255, 220, 80)
+        elif game.winner == 0:
+            msg = "PLAYER WINS!" if getattr(game, "ai_enabled", False) else "PLAYER 1 WINS!"
+            color = COLORS["snake1_head"]
+        elif game.winner == 1:
+            msg = "AI WINS!" if getattr(game, "ai_enabled", False) else "PLAYER 2 WINS!"
+            color = COLORS["snake2_head"]
+        elif game.win:
             msg = "YOU WIN!"
             color = (50, 255, 50)
         else:
@@ -138,7 +148,8 @@ class Renderer:
         self.screen.blit(text, (WINDOW_WIDTH//2 - text.get_width()//2, WINDOW_HEIGHT//2 - 80))
         score_msg = []
         for i, s in enumerate(game.snakes):
-            score_msg.append(f"Player {i+1} Score: {s.score}")
+            label = f"{game.ai_name} AI" if getattr(game, "ai_enabled", False) and i == 1 else f"Player {i+1}"
+            score_msg.append(f"{label} Score: {s.score}")
         y = WINDOW_HEIGHT//2
         for m in score_msg:
             surf = self.font_medium.render(m, True, (255, 255, 255))

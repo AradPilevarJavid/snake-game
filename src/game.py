@@ -1,5 +1,6 @@
 import random
 from collections import deque
+from ai import DEFAULT_AI_TYPE, create_ai, get_ai_name
 from config import *
 
 DIR_VECTORS = {
@@ -42,7 +43,7 @@ class Snake:
         dx, dy = DIR_VECTORS[self.direction]
         hx, hy = self.head()
         new_head = (hx + dx, hy + dy)
-        self.segments.appendleft(new_head) # absolute cinema
+        self.segments.appendleft(new_head)
         if grow:
             self.grow_count += 1
         else:
@@ -88,15 +89,20 @@ class Snake:
 
 
 class Game:
-    def __init__(self, difficulty, players, renderer):
+    def __init__(self, difficulty, players, renderer, ai_enabled=False, ai_type=DEFAULT_AI_TYPE):
         self.difficulty = difficulty
         self.players = players
+        self.ai_enabled = ai_enabled
+        self.ai_type = ai_type
+        self.ai_name = get_ai_name(ai_type)
+        self.ai_controller = create_ai(ai_type) if ai_enabled else None
         self.renderer = renderer
         self.grid_width = GRID_WIDTH
         self.grid_height = GRID_HEIGHT
         self.paused = False
         self.game_over = False
         self.win = False
+        self.winner = None
         self.snakes = []
         self.fruit = None
         self.mystery_box = None
@@ -120,18 +126,6 @@ class Game:
 
         self._spawn_fruit()
 
-
-    def _place_obstacles(self):
-        self.obstacles.clear()
-        occupied = self._get_occupied_cells(include_fruit=True)
-        available = [
-            (x, y) for x in range(self.grid_width) 
-            for y in range(self.grid_height) 
-            if (x, y) not in occupied
-        ]
-        chosen = random.sample(available, min(10, len(available)))
-        self.obstacles = set(chosen)
-
     def _get_occupied_cells(self, include_fruit=True, include_mystery_box=True):
         occupied = set()
         for s in self.snakes:
@@ -142,7 +136,6 @@ class Game:
         if include_mystery_box and self.mystery_box_active and self.mystery_box:
             occupied.add(self.mystery_box)
         return occupied
-
 
     def _place_obstacles(self):
         self.obstacles.clear()
@@ -155,7 +148,6 @@ class Game:
         chosen = random.sample(available, min(10, len(available)))
         self.obstacles = set(chosen)
 
-
     def _spawn_fruit(self):
         occupied = self._get_occupied_cells(include_mystery_box=True)
         available = [
@@ -164,7 +156,6 @@ class Game:
             if (x, y) not in occupied
         ]
         self.fruit = random.choice(available) if available else None
-
 
     def _spawn_mystery_box(self):
         occupied = self._get_occupied_cells(include_fruit=True)
@@ -179,12 +170,11 @@ class Game:
         else:
             self.mystery_box_active = False
 
-
     def _activate_mystery_effect(self, snake, current_time):
         effect = random.choice(["color", "fruit_pack", "speed"])
         if effect == "color":
             end_time = current_time + EFFECT_DURATION
-            snake.apply_color_effect((random.randint(50, 255), random.randint(50, 255),random.randint(50, 255)),
+            snake.apply_color_effect((random.randint(50, 255), random.randint(50, 255), random.randint(50, 255)),
                                      end_time)
             self.effect_countdown_end = end_time
             self.score_popup = ("color change", current_time + 1000)
@@ -198,6 +188,34 @@ class Game:
             self.effect_countdown_end = end_time
             self.score_popup = ("speed boost", current_time + 1000)
 
+    def get_ai_direction(self, snake_index):
+        if self.ai_controller:
+            return self.ai_controller.get_direction(self, snake_index)
+        return self.snakes[snake_index].direction
+
+    def _set_winner_by_score(self):
+        if self.players < 2:
+            return
+
+        score1 = self.snakes[0].score
+        score2 = self.snakes[1].score
+        if score1 > score2:
+            self.winner = 0
+        elif score2 > score1:
+            self.winner = 1
+        else:
+            self.winner = "tie"
+
+    def get_result_for_snake(self, snake_index):
+        if self.players == 1:
+            return "n/a"
+        if self.winner is None:          # <-- FIX: undefined winner → "n/a"
+            return "n/a"
+        if self.winner == "tie":
+            return "tie"
+        if self.winner == snake_index:
+            return "win"
+        return "loss"
 
     def update(self, current_time):
         if self.game_over or self.paused:
@@ -237,8 +255,38 @@ class Game:
                         self.renderer.sound_hit.play()
                         continue
 
+        # --- Handle game‑over for AI mode (already correct) ---
+        if self.ai_enabled and self.players == 2:
+            player_alive = self.snakes[0].alive
+            ai_alive = self.snakes[1].alive
+            if not player_alive or not ai_alive:
+                if not player_alive and not ai_alive:
+                    self._set_winner_by_score()
+                elif not player_alive:
+                    self.winner = 1
+                else:
+                    self.winner = 0
+                self.game_over = True
+                return
+
+        # --- FIX: handle death in two‑player human vs human ---
+        elif self.players == 2:
+            alive_snakes = [s for s in self.snakes if s.alive]
+            if len(alive_snakes) == 1:
+                self.winner = 0 if alive_snakes[0] is self.snakes[0] else 1
+                self.game_over = True
+                return
+            elif not alive_snakes:
+                self._set_winner_by_score()
+                self.game_over = True
+                return
+
+        # --- end of death handling fix ---
+
         alive_snakes = [s for s in self.snakes if s.alive]
         if not alive_snakes:
+            if self.players == 2:
+                self._set_winner_by_score()
             self.game_over = True
             return
 
@@ -273,6 +321,7 @@ class Game:
             occupied += 1
         if occupied >= total_cells:
             self.win = True
+            self._set_winner_by_score()
             self.game_over = True
 
     def pause_toggle(self):
@@ -284,3 +333,4 @@ class Game:
         if direction == OPPOSITE[snake.direction]:
             return
         snake.next_direction = direction
+

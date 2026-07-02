@@ -1,3 +1,4 @@
+from datetime import datetime
 import pygame
 from config import *
 from game import Game
@@ -19,7 +20,9 @@ def main():
         game = Game(
             difficulty=choice["difficulty"],
             players=choice["players"],
-            renderer=renderer)
+            renderer=renderer,
+            ai_enabled=choice["ai"],
+            ai_type=choice["ai_type"])
         last_move_time = pygame.time.get_ticks()
         game.last_mystery_box_time = last_move_time
 
@@ -45,7 +48,7 @@ def main():
                                 game.set_direction(0, "LEFT")
                             elif event.key == pygame.K_d:
                                 game.set_direction(0, "RIGHT")
-                        if game.players == 2:
+                        if game.players == 2 and not game.ai_enabled:
                             if event.key == pygame.K_UP:
                                 game.set_direction(1, "UP")
                             elif event.key == pygame.K_DOWN:
@@ -56,11 +59,20 @@ def main():
                                 game.set_direction(1, "RIGHT")
 
                     if game.game_over and event.key == pygame.K_RETURN: # Enter key
-                        for snake in game.snakes:
+                        score_snakes = game.snakes[:1] if game.ai_enabled else game.snakes
+                        timestamp = datetime.utcnow().isoformat()
+                        for snake_index, snake in enumerate(score_snakes):
                             if snake.score > 0:
                                 name = renderer.get_name_input()
                                 if name:
-                                    scoreboard.add_score(name, snake.score, game.players)
+                                    scoreboard.add_score(
+                                        name,
+                                        snake.score,
+                                        game.players,
+                                        game.get_result_for_snake(snake_index),
+                                        game.difficulty,
+                                        timestamp,
+                                    )
                         running = False
 
             if not game.paused and not game.game_over:
@@ -68,6 +80,8 @@ def main():
                 if game.snakes[0].is_fast(current_time):
                     move_delay = FAST_MOVE_DELAY
                 if current_time - last_move_time >= move_delay:
+                    if game.ai_enabled:
+                        game.set_direction(1, game.get_ai_direction(1))
                     game.update(current_time)
                     last_move_time = current_time
 

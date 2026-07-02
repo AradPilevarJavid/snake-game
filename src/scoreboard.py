@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 from config import *
 import pygame
 
@@ -18,13 +19,39 @@ def save_scores(scores):
     with open(SCORE_FILE, 'w') as f:
         json.dump(scores, f, indent = 4)
 
-def add_score(name, score, players):
+def add_score(name, score, players, result="n/a", difficulty="normal", timestamp=None):
     scores = load_scores()
-    entry = {"name": name, "score": score, "players": players}
+    entry = {
+        "name": name,
+        "score": score,
+        "players": players,
+        "result": result,
+        "difficulty": difficulty,
+        "timestamp": timestamp or datetime.utcnow().isoformat(),
+    }
     scores.append(entry)
     scores.sort(key=lambda x: x["score"], reverse=True)
     scores = scores[:10]
     save_scores(scores)
+
+def format_timestamp(timestamp):
+    if not timestamp:
+        return "Unknown time"
+    try:
+        parsed = datetime.fromisoformat(timestamp)
+        return parsed.strftime("%Y-%m-%d %H:%M UTC")
+    except ValueError:
+        return timestamp[:16]
+
+def get_result_badge(result):
+    result = (result or "n/a").lower()
+    if result == "win":
+        return "WIN", (90, 230, 120)
+    if result == "loss":
+        return "LOSS", (240, 90, 90)
+    if result == "tie":
+        return "TIE", (245, 210, 80)
+    return "N/A", (170, 170, 170)
 
 def show_scoreboard(renderer):
     scores = load_scores()
@@ -80,20 +107,45 @@ def show_scoreboard(renderer):
                 rank_y = row_rect.centery - rank_surf.get_height() // 2
                 renderer.screen.blit(rank_surf, (rank_x, rank_y))
 
+                result_text, result_color = get_result_badge(entry.get("result", "n/a"))
+                result_surf = renderer.font_small.render(result_text, True, result_color)
+                result_pad_x = 10
+                result_badge = pygame.Rect(
+                    row_rect.right - result_surf.get_width() - result_pad_x * 2 - 12,
+                    row_rect.centery - 13,
+                    result_surf.get_width() + result_pad_x * 2,
+                    26,
+                )
+                pygame.draw.rect(renderer.screen, (25, 25, 25), result_badge, border_radius=13)
+                pygame.draw.rect(renderer.screen, result_color, result_badge, 1, border_radius=13)
+                renderer.screen.blit(
+                    result_surf,
+                    (
+                        result_badge.centerx - result_surf.get_width() // 2,
+                        result_badge.centery - result_surf.get_height() // 2,
+                    ),
+                )
 
                 players_count = entry.get("players", 1)
                 badge_text = "1P" if players_count == 1 else "2P"
                 badge_color = (150, 150, 255) if players_count == 1 else (255, 150, 150)
                 badge_surf = renderer.font_small.render(badge_text, True, badge_color)
-                badge_x = row_rect.right - badge_surf.get_width() - 15
+                badge_x = result_badge.x - badge_surf.get_width() - 18
                 badge_y = row_rect.centery - badge_surf.get_height() // 2
                 renderer.screen.blit(badge_surf, (badge_x, badge_y))
 
 
                 name_surf = renderer.font_medium.render(entry["name"], True, (255, 255, 255))
                 name_x = rank_x + 50
-                name_y = row_rect.centery - name_surf.get_height() // 2
+                name_y = row_rect.y + 5
                 renderer.screen.blit(name_surf, (name_x, name_y))
+
+                difficulty = entry.get("difficulty", "normal").capitalize()
+                time_text = format_timestamp(entry.get("timestamp"))
+                detail_text = f"{difficulty} • {time_text}"
+                detail_surf = renderer.font_small.render(detail_text, True, (165, 165, 165))
+                detail_y = row_rect.y + 27
+                renderer.screen.blit(detail_surf, (name_x, detail_y))
 
 
                 score_text = str(entry["score"])

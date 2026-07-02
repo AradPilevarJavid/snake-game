@@ -1,9 +1,15 @@
 import pygame
+from ai import AI_OPTIONS
 from config import *
 import scoreboard
 
 
 def show_main_menu(renderer):
+    modes = [
+        {"name": "Single Player", "players": 1, "ai": False},
+        {"name": "Two Players", "players": 2, "ai": False},
+        {"name": "Player vs AI", "players": 2, "ai": True},
+    ]
     buttons = [
         {"text": "New Game", "action": "new_game", "rect": pygame.Rect(0, 0, 200, 60)},
         {"text": "Scoreboard", "action": "scoreboard", "rect": pygame.Rect(0, 0, 200, 60)},
@@ -17,8 +23,20 @@ def show_main_menu(renderer):
         b["rect"].centerx = WINDOW_WIDTH // 2
         b["rect"].centery = start_y + i * spacing
 
-    selected_mode = "single"
+    selected_mode_idx = 0
     selected_difficulty = "normal"
+    selected_ai_idx = 0
+
+    def build_new_game_choice():
+        selected_mode = modes[selected_mode_idx]
+        selected_ai = AI_OPTIONS[selected_ai_idx]
+        return {
+            "action": "new_game",
+            "players": selected_mode["players"],
+            "ai": selected_mode["ai"],
+            "ai_type": selected_ai["id"],
+            "difficulty": selected_difficulty,
+        }
 
     while True:
         renderer.clear()
@@ -36,13 +54,20 @@ def show_main_menu(renderer):
         renderer.screen.blit(title, (WINDOW_WIDTH//2 - title.get_width()//2, 30))
 
         sub_y = 100
-        mode_text = f"Mode: {'Two Players' if selected_mode == 'Two players' else 'Single Player'}"
+        selected_mode = modes[selected_mode_idx]
+        mode_text = f"Mode: {selected_mode['name']}"
         mode_surf = renderer.font_medium.render(mode_text, True, (255, 255, 255))
         renderer.screen.blit(mode_surf, (WINDOW_WIDTH//2 - mode_surf.get_width()//2, sub_y))
         sub_y += 40
         diff_text = f"Difficulty: {selected_difficulty.capitalize()}"
         diff_surf = renderer.font_medium.render(diff_text, True, (255, 255, 255))
         renderer.screen.blit(diff_surf, (WINDOW_WIDTH//2 - diff_surf.get_width()//2, sub_y))
+        sub_y += 40
+        if selected_mode["ai"]:
+            selected_ai = AI_OPTIONS[selected_ai_idx]
+            ai_text = f"AI: {selected_ai['name']}"
+            ai_surf = renderer.font_medium.render(ai_text, True, COLORS["snake2_head"])
+            renderer.screen.blit(ai_surf, (WINDOW_WIDTH//2 - ai_surf.get_width()//2, sub_y))
 
         for b in buttons:
             hover = b["rect"].collidepoint(mx, my)
@@ -50,7 +75,7 @@ def show_main_menu(renderer):
             if mouse_click and hover:
                 renderer.sound_button.play()
                 if b["action"] == "new_game":
-                    return {"action": "new_game", "players": 2 if selected_mode == "Two players" else 1, "difficulty": selected_difficulty}
+                    return build_new_game_choice()
                 elif b["action"] == "scoreboard":
                     result = scoreboard.show_scoreboard(renderer)
                     if result is False:
@@ -61,10 +86,13 @@ def show_main_menu(renderer):
         choice = None
         keys = pygame.key.get_pressed()
         if keys[pygame.K_m]:
-            selected_mode = "Two players" if selected_mode == "single" else "single"
+            selected_mode_idx = (selected_mode_idx + 1) % len(modes)
             pygame.time.wait(200)
         if keys[pygame.K_d]:
             selected_difficulty = "hard" if selected_difficulty == "normal" else "normal"
+            pygame.time.wait(200)
+        if selected_mode["ai"] and keys[pygame.K_a]:
+            selected_ai_idx = (selected_ai_idx + 1) % len(AI_OPTIONS)
             pygame.time.wait(200)
         if keys[pygame.K_n]:
             choice = "New game"
@@ -78,7 +106,7 @@ def show_main_menu(renderer):
 
         if choice:
             if choice == "New game":
-                return {"action": "new_game", "players": 2 if selected_mode == "Two players" else 1, "difficulty": selected_difficulty}
+                return build_new_game_choice()
             elif choice == "show scoreboard":
                 result = scoreboard.show_scoreboard(renderer)
                 if result is False:
