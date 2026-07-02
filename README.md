@@ -83,6 +83,23 @@ In the scoreboard, click **Return** or press **Esc** to go back.
     └── ui.py
 ```
 
+## ⚙️ For Pro Users
+
+You can easily tweak the game’s behaviour by editing src/config.py:
+
+  Mystery box frequency – find the line and change the number (in milliseconds). Lower values = boxes spawn more often.
+
+```
+  MYSTERY_BOX_INTERVAL = 10000
+```
+  
+Snake speed – find the line and decrease the value to make the snake move faster. You can also adjust FPS for smoother animation.
+```
+BASE_MOVE_DELAY = 120
+```
+Feel free to experiment! All changes are safe – just restart the game to see them in action.
+
+
 ## 📜 License
 
 This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
