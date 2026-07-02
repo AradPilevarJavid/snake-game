@@ -47,6 +47,48 @@ class BaseSnakeAI:
             blocked.update(snake.segments)
         return blocked
 
+    def _player_is_invincible(self, game):
+        if not getattr(game, "ai_enabled", False) or len(game.snakes) < 2:
+            return False
+        player = game.snakes[0]
+        current_time = getattr(game, "current_time", None)
+        if current_time is None:
+            return False
+        return game.is_snake_invincible(player, current_time)
+
+    def _distance_to_player(self, game, pos):
+        player_segments = list(game.snakes[0].segments)
+        if not player_segments:
+            return 0
+        return min(abs(pos[0] - x) + abs(pos[1] - y) for x, y in player_segments)
+
+    def _open_neighbors_after_move(self, game, snake_index, pos):
+        blocked = self._get_blocked_cells(game)
+        blocked.discard(game.snakes[snake_index].head())
+        open_neighbors = 0
+        for dx, dy in DIR_VECTORS.values():
+            next_pos = (pos[0] + dx, pos[1] + dy)
+            if self._is_in_bounds(game, next_pos) and next_pos not in blocked:
+                open_neighbors += 1
+        return open_neighbors
+
+    def _avoid_player_direction(self, game, snake_index):
+        safe_directions = self._get_safe_directions(game, snake_index)
+        if not safe_directions:
+            return game.snakes[snake_index].direction
+
+        hx, hy = game.snakes[snake_index].head()
+
+        def safety_score(direction):
+            dx, dy = DIR_VECTORS[direction]
+            next_pos = (hx + dx, hy + dy)
+            return (
+                self._distance_to_player(game, next_pos),
+                self._open_neighbors_after_move(game, snake_index, next_pos),
+            )
+
+        return max(safe_directions, key=safety_score)
+
     def _get_safe_directions(self, game, snake_index):
         snake = game.snakes[snake_index]
         blocked = self._get_blocked_cells(game)
@@ -82,6 +124,9 @@ class EasyGreedyAI(BaseSnakeAI):
         if not snake.alive:
             return snake.direction
 
+        if snake_index == 1 and self._player_is_invincible(game):
+            return self._avoid_player_direction(game, snake_index)
+
         safe_directions = self._get_safe_directions(game, snake_index)
         if not safe_directions:
             return snake.direction
@@ -108,6 +153,9 @@ class SmartBfsAI(BaseSnakeAI):
         snake = game.snakes[snake_index]
         if not snake.alive:
             return snake.direction
+
+        if snake_index == 1 and self._player_is_invincible(game):
+            return self._avoid_player_direction(game, snake_index)
 
         blocked = self._get_blocked_cells(game)
         start = snake.head()

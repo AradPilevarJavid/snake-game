@@ -81,7 +81,7 @@ def main():
                     move_delay = FAST_MOVE_DELAY
                 if current_time - last_move_time >= move_delay:
                     if game.ai_enabled:
-                        game.set_direction(1, game.get_ai_direction(1))
+                        game.set_direction(1, game.get_ai_direction(1, current_time))
                     game.update(current_time)
                     last_move_time = current_time
 

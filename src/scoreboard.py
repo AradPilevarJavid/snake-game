@@ -154,8 +154,10 @@ def show_scoreboard(renderer):
                 score_y = row_rect.centery - score_surf.get_height() // 2
                 renderer.screen.blit(score_surf, (score_x, score_y))
 
-        prompt = renderer.font_small.render("Press ESC to return", True, (180, 180, 180))
-        renderer.screen.blit(prompt, (WINDOW_WIDTH // 2 - prompt.get_width() // 2, WINDOW_HEIGHT - 80))
+        return_rect = pygame.Rect(0, 0, 200, 60)
+        return_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT - 55)
+        return_hover = return_rect.collidepoint(mx, my)
+        renderer.draw_button(return_rect, "Return", return_hover)
 
 
         for event in pygame.event.get():
@@ -166,7 +168,8 @@ def show_scoreboard(renderer):
                     return True
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    pass
+                    if return_rect.collidepoint(event.pos):
+                        return True
 
         renderer.update_display()
     return True

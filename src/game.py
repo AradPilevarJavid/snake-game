@@ -111,6 +111,7 @@ class Game:
         self.obstacles = set()
         self.score_popup = None
         self.popup_timer = 0
+        self.current_time = 0
 
         start1 = (GRID_WIDTH // 4, GRID_HEIGHT // 2)
         snake1 = Snake(start1, "UP", COLORS["snake1_head"], COLORS["snake1_body"])
@@ -188,10 +189,15 @@ class Game:
             self.effect_countdown_end = end_time
             self.score_popup = ("speed boost", current_time + 1000)
 
-    def get_ai_direction(self, snake_index):
+    def get_ai_direction(self, snake_index, current_time=None):
+        if current_time is not None:
+            self.current_time = current_time
         if self.ai_controller:
             return self.ai_controller.get_direction(self, snake_index)
         return self.snakes[snake_index].direction
+
+    def is_snake_invincible(self, snake, current_time):
+        return snake.effect_color is not None and current_time < snake.effect_color_end
 
     def _set_winner_by_score(self):
         if self.players < 2:
@@ -221,6 +227,8 @@ class Game:
         if self.game_over or self.paused:
             return
 
+        self.current_time = current_time
+
         for s in self.snakes:
             if not s.alive:
                 continue
@@ -240,7 +248,18 @@ class Game:
             if not s.alive:
                 continue
 
-            invincible = (s.effect_color is not None and current_time < s.effect_color_end)
+            invincible = self.is_snake_invincible(s, current_time)
+
+            if (
+                self.ai_enabled
+                and self.players == 2
+                and s is self.snakes[1]
+                and self.is_snake_invincible(self.snakes[0], current_time)
+                and s.head() in self.snakes[0].segments
+            ):
+                s.alive = False
+                self.renderer.sound_hit.play()
+                continue
 
             if not invincible:
                 if (s.check_wall_collision() or s.check_self_collision() or
@@ -333,4 +352,3 @@ class Game:
         if direction == OPPOSITE[snake.direction]:
             return
         snake.next_direction = direction
-
