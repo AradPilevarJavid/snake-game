@@ -1,5 +1,10 @@
 # 🐍 Snake Game
 
+[![Pygame](https://img.shields.io/badge/library-pygame-brightgreen)](https://www.pygame.org/)
+[![Made with Python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
+[![GitHub last commit](https://img.shields.io/github/last-commit/yourusername/yourrepo)](https://github.com/yourusername/yourrepo)
+[![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
+
 Have fun playing a classic Snake game built with Python and Pygame.  
 It includes single‑player, two‑player, **Player vs AI** modes, selectable difficulty, smart AI options, mystery power‑ups, procedurally generated sound, and a persistent scoreboard.
 
