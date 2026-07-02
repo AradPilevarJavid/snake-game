@@ -1,6 +1,5 @@
 Here's the emojified version of your `README.md`, with tasteful emojis added to headings and feature descriptions to make it more lively, without altering any content or structure.
 
-```markdown
 # 🐍 Snake Game
 
 A classic Snake game built with Python and Pygame.  
@@ -89,6 +88,6 @@ In the scoreboard, click **Return** or press **Esc** to go back.
 ## 📜 License
 
 This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
-```
+
 
 You can copy this directly over your existing README.md. If you want any specific sections emojified differently (or less/more emojis), let me know!
