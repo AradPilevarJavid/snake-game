@@ -1,65 +1,94 @@
-# Snake Game 🐍
+Here's the emojified version of your `README.md`, with tasteful emojis added to headings and feature descriptions to make it more lively, without altering any content or structure.
 
-A classic Snake game built with Python and Pygame. It includes single and two-player modes, selectable difficulty, mystery power-ups, procedurally generated sound, and a persistent scoreboard.
+```markdown
+# 🐍 Snake Game
 
-## Features
+A classic Snake game built with Python and Pygame.  
+It includes single‑player, two‑player, **Player vs AI** modes, selectable difficulty, smart AI options, mystery power‑ups, procedurally generated sound, and a persistent scoreboard.
 
-- Single and two-player modes on a shared 30x30 grid
-- Two difficulties: Normal, and Hard, which scatters obstacles that reshuffle each time fruit is eaten
-- Mystery boxes that appear periodically and grant one of three random effects:
-  - Color change: temporary invincibility with wall wrap-around
-  - Fruit pack: +5 length and +5 score
-  - Speed boost: move twice as fast
-- Hall of Fame: top 10 scores saved to disk, with medals for the top three and 1P/2P badges
-- Procedural sound effects generated at runtime, so no audio files are required
-- Win by filling the entire board
+## ✨ Features
 
-## Requirements
+- 👤👥🤖 **Game modes:** Single‑player, two‑player, and Player vs AI on a shared 30×30 grid
+- 🧠 **AI difficulty:**
+  - 🟢 **Easy** – greedy AI that sometimes moves randomly
+  - 🔵 **Smart** – BFS‑based AI that actively avoids the invincible player
+- ⚡ **Invincibility rule:** when you’re invincible, the AI snake **dies** if it hits you
+- 🎮 **Game difficulty:**
+  - 🟩 **Normal** – classic play
+  - 🟥 **Hard** – reshuffling obstacles appear with each fruit eaten
+- 🎁 **Mystery boxes** appear periodically and grant one of three random effects:
+  - 🌈 **Colour change** – temporary invincibility + wall wrap
+  - 🍎 **Fruit pack** – +5 length and +5 score
+  - ⚡ **Speed boost** – move twice as fast
+- 🏆 **Hall of Fame** – top 10 scores saved locally, with 🥇🥈🥉 medals and 1P/2P badges
+- 🔊 **Procedural sound** – no external audio files needed
+- 🏁 Win by filling the entire board
 
-- Python 3.x
-- Pygame
+## 📋 Requirements
 
-## Install dependencies:
+- 🐍 Python 3.x
+- 🎮 Pygame
 
-````bash
+Install dependencies:
+
+```bash
 pip install -r requirements.txt
-````
+```
 
-## Running
+## 🚀 Running
 
 ```bash
 python src/main.py
 ```
 
-- move with WASD for single player and WASD and arrows for two player
-- P: pause / resume
-- Esc: return to the menu
-- Enter: continue and submit your score after game over
+### 🕹️ In‑Game Controls
 
-Menu:
+| Key(s)          | Action                                      |
+|-----------------|---------------------------------------------|
+| **W A S D**     | Move Player 1                               |
+| **Arrow keys**  | Move Player 2 (two‑player, human vs human) |
+| **P**           | Pause / Resume                              |
+| **Esc**         | Return to main menu                         |
+| **Enter**       | Submit score after game over                |
 
-- Click New Game, Scoreboard, or Quit, or use the keyboard:
-- M: toggle single / two-player mode
-- D: toggle Normal / Hard difficulty
-- N: new game
-- S: scoreboard
-- Q: quit
+### 📋 Menu Controls
 
-## 📁Project Structure
+| Key / Mouse                 | Action                                                       |
+|-----------------------------|--------------------------------------------------------------|
+| **Click `Mode` text**       | Cycle Single Player → Two Players → Player vs AI             |
+| **Click `Difficulty` text** | Toggle Normal / Hard                                         |
+| **Click `AI` text**         | Cycle Easy / Smart AI (Player vs AI mode)                    |
+| **M**                       | Same as clicking Mode                                        |
+| **D**                       | Same as clicking Difficulty                                 |
+| **A**                       | Same as clicking AI (if visible)                             |
+| **N** / **Click New Game**  | Start a new game                                             |
+| **S** / **Click Scoreboard**| Open Scoreboard                                              |
+| **Q** / **Click Quit**      | Quit                                                         |
+
+In the scoreboard, click **Return** or press **Esc** to go back.
+
+## 📁 Project Structure
 
 ```
-├── assets
-│   └── scores.json
-├── src
-│   ├── config.py
-│   ├── game.py
-│   ├── main.py
-│   ├── menu.py
-│   ├── scoreboard.py
-│   └── ui.py
+├── LICENSE
 ├── README.md
-└── requirements.txt
+├── assets/
+│   └── tone.wav          (optional – not required)
+├── scores.json
+├── requirements.txt
+└── src/
+    ├── ai.py
+    ├── config.py
+    ├── game.py
+    ├── main.py
+    ├── menu.py
+    ├── scoreboard.py
+    └── ui.py
 ```
-## Roadmap
-- [x] add player vs AI
-- [x] more elaborate and beautiful scoreboard
+
+## 📜 License
+
+This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
+```
+
+You can copy this directly over your existing README.md. If you want any specific sections emojified differently (or less/more emojis), let me know!
