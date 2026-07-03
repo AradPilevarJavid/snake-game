@@ -112,6 +112,7 @@ class Game:
         self.score_popup = None
         self.popup_timer = 0
         self.current_time = 0
+        self.pause_started_at = None
 
         start1 = (GRID_WIDTH // 4, GRID_HEIGHT // 2)
         snake1 = Snake(start1, "UP", COLORS["snake1_head"], COLORS["snake1_body"])
@@ -343,9 +344,38 @@ class Game:
             self._set_winner_by_score()
             self.game_over = True
 
-    def pause_toggle(self):
+    def get_effective_time(self, current_time):
+        if self.paused and self.pause_started_at is not None:
+            return self.pause_started_at
+        return current_time
+
+    def _pause_active_effects(self, paused_duration):
+        if paused_duration <= 0:
+            return
+
+        pause_started_at = self.pause_started_at
+        for snake in self.snakes:
+            if snake.effect_color_end > pause_started_at:
+                snake.effect_color_end += paused_duration
+            if snake.effect_speed_end > pause_started_at:
+                snake.effect_speed_end += paused_duration
+
+        if hasattr(self, "effect_countdown_end") and self.effect_countdown_end > pause_started_at:
+            self.effect_countdown_end += paused_duration
+
+    def pause_toggle(self, current_time=None):
         if not self.game_over:
-            self.paused = not self.paused
+            if current_time is None:
+                current_time = self.current_time
+
+            if self.paused:
+                paused_duration = current_time - self.pause_started_at
+                self._pause_active_effects(paused_duration)
+                self.pause_started_at = None
+                self.paused = False
+            else:
+                self.pause_started_at = current_time
+                self.paused = True
 
     def set_direction(self, snake_idx, direction):
         snake = self.snakes[snake_idx]

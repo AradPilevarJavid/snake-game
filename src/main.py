@@ -37,7 +37,7 @@ def main():
                     if event.key == pygame.K_ESCAPE:
                         running = False
                     elif event.key == pygame.K_p:
-                        game.pause_toggle()
+                        game.pause_toggle(current_time)
                     elif not game.paused and not game.game_over:
                         if game.players >= 1:
                             if event.key == pygame.K_w:
@@ -87,6 +87,7 @@ def main():
 
             renderer.clear()
             renderer.draw_grid()
+            effective_time = game.get_effective_time(current_time)
             if game.obstacles:
                 renderer.draw_obstacles(game.obstacles)
             if game.fruit:
@@ -95,8 +96,8 @@ def main():
                 renderer.draw_mystery_box(game.mystery_box)
             for snake in game.snakes:
                 if snake.alive:
-                    renderer.draw_snake(snake, current_time)
-            renderer.draw_info_bar(game, current_time)
+                    renderer.draw_snake(snake, effective_time)
+            renderer.draw_info_bar(game, effective_time)
             if game.game_over:
                 renderer.draw_game_over(game)
             renderer.update_display()
