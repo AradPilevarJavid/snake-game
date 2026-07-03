@@ -5,6 +5,12 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/AradPilevarJavid/snake-game)](https://github.com/AradPilevarJavid/snake-game)
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
 
+---
+
+<p align="center">
+  <img src="snake.gif" alt="ccp demo"/>
+</p>
+
 Have fun playing a classic Snake game built with Python and Pygame.  
 It includes single‑player, two‑player, **Player vs AI** modes, selectable difficulty, smart AI options, mystery power‑ups, procedurally generated sound, and a persistent scoreboard.
 
