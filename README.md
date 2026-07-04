@@ -98,13 +98,14 @@ In the scoreboard, click **Return** or press **Esc** to go back.
 
 You can easily tweak the game’s behaviour by editing src/config.py:
 
-  Mystery box frequency – find the line and change the number (in milliseconds). Lower values = boxes spawn more often.
+Mystery box frequency – find the line and change the number (in milliseconds). Lower values = boxes spawn more often.
 
 ```
 MYSTERY_BOX_INTERVAL = 10000
 ```
 
-Feel free to decrease the random_chance variable in line 116 of src/ai.py to make the greedy ai slightly stronger.
+<a id="random-chance-tweak"></a>
+Feel free to decrease the `random_chance` variable in [line 116 of src/ai.py](src/ai.py#L116) to make the greedy AI slightly stronger.
 ```
 def __init__(self, random_chance=0.2):
 ```
@@ -120,7 +121,10 @@ BASE_MOVE_DELAY = 120
 
 Feel free to experiment! All changes are safe – just restart the game to see them in action.
 
+## How the ai's work
+1. Greedy: At each move the greedy AI calculates the Manhattan distance to the fruit and tries to dodge the human player. The AI makes a list of possible safe moves; if several are possible, it randomly chooses the one that minimizes the distance. At a fixed ratio addressed in [this section](#random-chance-tweak), it ignores the fruit entirely and picks a random safe move – making it playful, unpredictable, and beatable.
 
+2. BFS (Smart): Instead of one-step greed, this AI performs a Breadth-First Search from its head to the fruit, avoiding walls, its own body, the player, and obstacles. It finds the shortest safe path, then takes the first step along that path. If no safe path exists (e.g., it's trapped), it falls back to the greedy-with-random behavior. Like the greedy AI, it also prioritizes fleeing when the human is invincible. This makes the BFS AI far more strategic, but still vulnerable when cornered or when the board gets crowded.
 ## 📜 License
 
 This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
