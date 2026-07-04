@@ -98,7 +98,7 @@ In the scoreboard, click **Return** or press **Esc** to go back.
 
 You can easily tweak the game’s behaviour by editing src/config.py:
 
-Mystery box frequency – find the line and change the number (in milliseconds). Lower values = boxes spawn more often.
+Mystery box frequency – go to [line 9 of src/config.py](src/config.py#L9) and change the number (in milliseconds). Lower values = boxes spawn more often.
 
 ```
 MYSTERY_BOX_INTERVAL = 10000
@@ -109,12 +109,12 @@ Feel free to decrease the `random_chance` variable in [line 116 of src/ai.py](sr
 ```
 def __init__(self, random_chance=0.2):
 ```
-To make the appearance of the mystery box completely random and different each time edit line 348 of src/game.py
+To make the appearance of the mystery box completely random and different each time edit [line 348 of src/game.py](src/game.py#L348).
 ```
 and current_time - self.last_mystery_box_time > MYSTERY_BOX_INTERVAL # You can change this to random.randint(500,15000)
 ```
 
-Snake speed – find the line and decrease the value to make the snake move faster. You can also adjust FPS for smoother animation.
+Snake speed – edit [line 7 of src/config.py](src/config.py#L7) and decrease the value to make the snake move faster. You can also adjust FPS for smoother animation.
 ```
 BASE_MOVE_DELAY = 120
 ```
