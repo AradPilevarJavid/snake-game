@@ -113,7 +113,7 @@ class BaseSnakeAI:
 
 
 class EasyGreedyAI(BaseSnakeAI):
-    def __init__(self, random_chance=0.4):
+    def __init__(self, random_chance=0.2):
         self.random_chance = random_chance
 
     def get_direction(self, game, snake_index):

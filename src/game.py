@@ -345,7 +345,7 @@ class Game:
 
         if (
             not self.mystery_box_active
-            and current_time - self.last_mystery_box_time > MYSTERY_BOX_INTERVAL
+            and current_time - self.last_mystery_box_time > MYSTERY_BOX_INTERVAL # You can change this to random.randint(500,15000)
         ):
             self._spawn_mystery_box()
             self.last_mystery_box_time = current_time
