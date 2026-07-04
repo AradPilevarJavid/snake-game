@@ -89,7 +89,9 @@ class Snake:
 
 
 class Game:
-    def __init__(self, difficulty, players, renderer, ai_enabled=False, ai_type=DEFAULT_AI_TYPE):
+    def __init__(
+        self, difficulty, players, renderer, ai_enabled=False, ai_type=DEFAULT_AI_TYPE
+    ):
         self.difficulty = difficulty
         self.players = players
         self.ai_enabled = ai_enabled
@@ -143,7 +145,8 @@ class Game:
         self.obstacles.clear()
         occupied = self._get_occupied_cells()
         available = [
-            (x, y) for x in range(self.grid_width)
+            (x, y)
+            for x in range(self.grid_width)
             for y in range(self.grid_height)
             if (x, y) not in occupied
         ]
@@ -153,7 +156,8 @@ class Game:
     def _spawn_fruit(self):
         occupied = self._get_occupied_cells(include_mystery_box=True)
         available = [
-            (x, y) for x in range(self.grid_width)
+            (x, y)
+            for x in range(self.grid_width)
             for y in range(self.grid_height)
             if (x, y) not in occupied
         ]
@@ -162,7 +166,8 @@ class Game:
     def _spawn_mystery_box(self):
         occupied = self._get_occupied_cells(include_fruit=True)
         available = [
-            (x, y) for x in range(self.grid_width)
+            (x, y)
+            for x in range(self.grid_width)
             for y in range(self.grid_height)
             if (x, y) not in occupied
         ]
@@ -176,8 +181,14 @@ class Game:
         effect = random.choice(["color", "fruit_pack", "speed"])
         if effect == "color":
             end_time = current_time + EFFECT_DURATION
-            snake.apply_color_effect((random.randint(50, 255), random.randint(50, 255), random.randint(50, 255)),
-                                     end_time)
+            snake.apply_color_effect(
+                (
+                    random.randint(50, 255),
+                    random.randint(50, 255),
+                    random.randint(50, 255),
+                ),
+                end_time,
+            )
             self.effect_countdown_end = end_time
             self.score_popup = ("color change", current_time + 1000)
         elif effect == "fruit_pack":
@@ -216,7 +227,7 @@ class Game:
     def get_result_for_snake(self, snake_index):
         if self.players == 1:
             return "n/a"
-        if self.winner is None:          # <-- FIX: undefined winner → "n/a"
+        if self.winner is None:  # <-- FIX: undefined winner → "n/a"
             return "n/a"
         if self.winner == "tie":
             return "tie"
@@ -263,8 +274,11 @@ class Game:
                 continue
 
             if not invincible:
-                if (s.check_wall_collision() or s.check_self_collision() or
-                    s.check_collision_with_obstacles(self.obstacles)):
+                if (
+                    s.check_wall_collision()
+                    or s.check_self_collision()
+                    or s.check_collision_with_obstacles(self.obstacles)
+                ):
                     s.alive = False
                     self.renderer.sound_hit.play()
                     continue
@@ -329,12 +343,17 @@ class Game:
                     self.last_mystery_box_time = current_time
                     self.mystery_box = None
 
-        if not self.mystery_box_active and current_time - self.last_mystery_box_time > MYSTERY_BOX_INTERVAL:
+        if (
+            not self.mystery_box_active
+            and current_time - self.last_mystery_box_time > MYSTERY_BOX_INTERVAL
+        ):
             self._spawn_mystery_box()
             self.last_mystery_box_time = current_time
 
         total_cells = self.grid_width * self.grid_height
-        occupied = sum(len(s.segments) for s in self.snakes if s.alive) + len(self.obstacles)
+        occupied = sum(len(s.segments) for s in self.snakes if s.alive) + len(
+            self.obstacles
+        )
         if self.fruit:
             occupied += 1
         if self.mystery_box_active:
@@ -360,7 +379,10 @@ class Game:
             if snake.effect_speed_end > pause_started_at:
                 snake.effect_speed_end += paused_duration
 
-        if hasattr(self, "effect_countdown_end") and self.effect_countdown_end > pause_started_at:
+        if (
+            hasattr(self, "effect_countdown_end")
+            and self.effect_countdown_end > pause_started_at
+        ):
             self.effect_countdown_end += paused_duration
 
     def pause_toggle(self, current_time=None):

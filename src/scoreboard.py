@@ -8,16 +8,18 @@ import pygame
 def load_scores():
     if not os.path.exists(SCORE_FILE):
         return []
-    with open(SCORE_FILE, 'r') as f:
+    with open(SCORE_FILE, "r") as f:
         try:
             data = json.load(f)
         except json.JSONDecodeError:
             return []
     return data
 
+
 def save_scores(scores):
-    with open(SCORE_FILE, 'w') as f:
-        json.dump(scores, f, indent = 4)
+    with open(SCORE_FILE, "w") as f:
+        json.dump(scores, f, indent=4)
+
 
 def add_score(name, score, players, result="n/a", difficulty="normal", timestamp=None):
     scores = load_scores()
@@ -34,6 +36,7 @@ def add_score(name, score, players, result="n/a", difficulty="normal", timestamp
     scores = scores[:10]
     save_scores(scores)
 
+
 def format_timestamp(timestamp):
     if not timestamp:
         return "Unknown time"
@@ -42,6 +45,7 @@ def format_timestamp(timestamp):
         return parsed.strftime("%Y-%m-%d %H:%M UTC")
     except ValueError:
         return timestamp[:16]
+
 
 def get_result_badge(result):
     result = (result or "n/a").lower()
@@ -52,6 +56,7 @@ def get_result_badge(result):
     if result == "tie":
         return "TIE", (245, 210, 80)
     return "N/A", (170, 170, 170)
+
 
 def show_scoreboard(renderer):
     scores = load_scores()
@@ -70,7 +75,9 @@ def show_scoreboard(renderer):
         # blit = bit block transfer.
         title = renderer.font_large.render("Hall of Fame", True, (68, 214, 44))
         title_shadow = renderer.font_large.render("Hall of Fame", True, (0, 0, 0))
-        renderer.screen.blit(title_shadow, (WINDOW_WIDTH // 2 - title.get_width() // 2 + 2, 32))
+        renderer.screen.blit(
+            title_shadow, (WINDOW_WIDTH // 2 - title.get_width() // 2 + 2, 32)
+        )
         renderer.screen.blit(title, (WINDOW_WIDTH // 2 - title.get_width() // 2, 30))
 
         panel_rect = pygame.Rect(50, 100, WINDOW_WIDTH - 100, 500)
@@ -80,15 +87,21 @@ def show_scoreboard(renderer):
         pygame.draw.rect(renderer.screen, (80, 80, 80), panel_rect, 2, border_radius=15)
 
         if not scores:
-            no_data = renderer.font_medium.render("No scores yet", True, (200, 200, 200))
-            renderer.screen.blit(no_data, (WINDOW_WIDTH // 2 - no_data.get_width() // 2, 250))
+            no_data = renderer.font_medium.render(
+                "No scores yet", True, (200, 200, 200)
+            )
+            renderer.screen.blit(
+                no_data, (WINDOW_WIDTH // 2 - no_data.get_width() // 2, 250)
+            )
         else:
             row_height = 48
             start_y = panel_rect.y + 20
             for i, entry in enumerate(scores):
                 y = start_y + i * row_height
 
-                row_rect = pygame.Rect(panel_rect.x + 10, y, panel_rect.width - 20, row_height - 4)
+                row_rect = pygame.Rect(
+                    panel_rect.x + 10, y, panel_rect.width - 20, row_height - 4
+                )
                 if i % 2 == 0:
                     row_color = (60, 60, 60)
                 else:
@@ -102,13 +115,15 @@ def show_scoreboard(renderer):
                     rank_color = SILVER
                 elif i == 2:
                     rank_color = BRONZE
-                rank_surf = renderer.font_medium.render(str(i+1), True, rank_color)
+                rank_surf = renderer.font_medium.render(str(i + 1), True, rank_color)
                 rank_x = row_rect.x + 15
                 rank_y = row_rect.centery - rank_surf.get_height() // 2
                 renderer.screen.blit(rank_surf, (rank_x, rank_y))
 
                 result_text, result_color = get_result_badge(entry.get("result", "n/a"))
-                result_surf = renderer.font_small.render(result_text, True, result_color)
+                result_surf = renderer.font_small.render(
+                    result_text, True, result_color
+                )
                 result_pad_x = 10
                 result_badge = pygame.Rect(
                     row_rect.right - result_surf.get_width() - result_pad_x * 2 - 12,
@@ -116,8 +131,12 @@ def show_scoreboard(renderer):
                     result_surf.get_width() + result_pad_x * 2,
                     26,
                 )
-                pygame.draw.rect(renderer.screen, (25, 25, 25), result_badge, border_radius=13)
-                pygame.draw.rect(renderer.screen, result_color, result_badge, 1, border_radius=13)
+                pygame.draw.rect(
+                    renderer.screen, (25, 25, 25), result_badge, border_radius=13
+                )
+                pygame.draw.rect(
+                    renderer.screen, result_color, result_badge, 1, border_radius=13
+                )
                 renderer.screen.blit(
                     result_surf,
                     (
@@ -134,8 +153,9 @@ def show_scoreboard(renderer):
                 badge_y = row_rect.centery - badge_surf.get_height() // 2
                 renderer.screen.blit(badge_surf, (badge_x, badge_y))
 
-
-                name_surf = renderer.font_medium.render(entry["name"], True, (255, 255, 255))
+                name_surf = renderer.font_medium.render(
+                    entry["name"], True, (255, 255, 255)
+                )
                 name_x = rank_x + 50
                 name_y = row_rect.y + 5
                 renderer.screen.blit(name_surf, (name_x, name_y))
@@ -143,13 +163,16 @@ def show_scoreboard(renderer):
                 difficulty = entry.get("difficulty", "normal").capitalize()
                 time_text = format_timestamp(entry.get("timestamp"))
                 detail_text = f"{difficulty} • {time_text}"
-                detail_surf = renderer.font_small.render(detail_text, True, (165, 165, 165))
+                detail_surf = renderer.font_small.render(
+                    detail_text, True, (165, 165, 165)
+                )
                 detail_y = row_rect.y + 27
                 renderer.screen.blit(detail_surf, (name_x, detail_y))
 
-
                 score_text = str(entry["score"])
-                score_surf = renderer.font_medium.render(score_text, True, (255, 255, 100))
+                score_surf = renderer.font_medium.render(
+                    score_text, True, (255, 255, 100)
+                )
                 score_x = badge_x - score_surf.get_width() - 30
                 score_y = row_rect.centery - score_surf.get_height() // 2
                 renderer.screen.blit(score_surf, (score_x, score_y))
@@ -158,7 +181,6 @@ def show_scoreboard(renderer):
         return_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT - 55)
         return_hover = return_rect.collidepoint(mx, my)
         renderer.draw_button(return_rect, "Return", return_hover)
-
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

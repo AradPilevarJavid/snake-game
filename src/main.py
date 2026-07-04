@@ -7,9 +7,8 @@ import menu
 import scoreboard
 
 
-
 def main():
-    renderer = ui.Renderer() # the renderer class handels all the visual output
+    renderer = ui.Renderer()  # the renderer class handels all the visual output
     quit_app = False
 
     while True:
@@ -22,7 +21,8 @@ def main():
             players=choice["players"],
             renderer=renderer,
             ai_enabled=choice["ai"],
-            ai_type=choice["ai_type"])
+            ai_type=choice["ai_type"],
+        )
         last_move_time = pygame.time.get_ticks()
         game.last_mystery_box_time = last_move_time
 
@@ -30,7 +30,7 @@ def main():
         while running:
             current_time = pygame.time.get_ticks()
             for event in pygame.event.get():
-                if event.type == pygame.QUIT: # if window close button is clicked.
+                if event.type == pygame.QUIT:  # if window close button is clicked.
                     running = False
                     break
                 if event.type == pygame.KEYDOWN:
@@ -58,8 +58,10 @@ def main():
                             elif event.key == pygame.K_RIGHT:
                                 game.set_direction(1, "RIGHT")
 
-                    if game.game_over and event.key == pygame.K_RETURN: # Enter key
-                        score_snakes = game.snakes[:1] if game.ai_enabled else game.snakes
+                    if game.game_over and event.key == pygame.K_RETURN:  # Enter key
+                        score_snakes = (
+                            game.snakes[:1] if game.ai_enabled else game.snakes
+                        )
                         timestamp = datetime.utcnow().isoformat()
                         for snake_index, snake in enumerate(score_snakes):
                             if snake.score > 0:
@@ -106,6 +108,7 @@ def main():
             break
 
     pygame.quit()
+
 
 if __name__ == "__main__":
     main()
