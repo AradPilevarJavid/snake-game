@@ -124,7 +124,8 @@ Feel free to experiment! All changes are safe – just restart the game to see t
 ## How the ai's work
 1. Greedy: At each move the greedy AI calculates the Manhattan distance to the fruit and tries to dodge the human player. The AI makes a list of possible safe moves; if several are possible, it randomly chooses the one that minimizes the distance. At a fixed ratio addressed in [this section](#random-chance-tweak), it ignores the fruit entirely and picks a random safe move – making it playful, unpredictable, and beatable.
 
-2. BFS (Smart): Instead of one-step greed, this AI performs a Breadth-First Search from its head to the fruit, avoiding walls, its own body, the player, and obstacles. It finds the shortest safe path, then takes the first step along that path. If no safe path exists (e.g., it's trapped), it falls back to the greedy-with-random behavior. Like the greedy AI, it also prioritizes fleeing when the human is invincible. This makes the BFS AI far more strategic, but still vulnerable when cornered or when the board gets crowded.
+2. BFS (Smart): BFS turns the whole board into a graph where each node is connected to four other nodes.Every time the AI snake wants to make a move it searches one neighbor at a time.it goes so on so forth so it finds the fruit.Because it explores the grid level by level, the first time it hits the fruit is guaranteed to be the shortest route possible.
+
 ## 📜 License
 
 This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
