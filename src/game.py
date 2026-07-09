@@ -19,13 +19,16 @@ OPPOSITE = {
 
 
 class Snake:
-    def __init__(self, start_pos, direction, color_head, color_body):
+    def __init__(self, start_pos, direction, color_head, color_body, lives=None):
+        self.start_pos = start_pos
+        self.start_direction = direction
         self.segments = deque([start_pos])
         self.direction = direction
         self.next_direction = direction
         self.color_head = color_head
         self.color_body = color_body
         self.alive = True
+        self.lives_remaining = lives
         self.grow_count = 0
         self.score = 0
         self.effect_color = None
@@ -87,10 +90,26 @@ class Snake:
     def is_fast(self, current_time):
         return current_time < self.effect_speed_end
 
+    def reset_after_life_loss(self, start_pos=None):
+        self.segments = deque([start_pos or self.start_pos])
+        self.direction = self.start_direction
+        self.next_direction = self.start_direction
+        self.alive = True
+        self.grow_count = 0
+        self.effect_color = None
+        self.effect_color_end = 0
+        self.effect_speed_end = 0
+
 
 class Game:
     def __init__(
-        self, difficulty, players, renderer, ai_enabled=False, ai_type=DEFAULT_AI_TYPE
+        self,
+        difficulty,
+        players,
+        renderer,
+        ai_enabled=False,
+        ai_type=DEFAULT_AI_TYPE,
+        lives=None,
     ):
         self.difficulty = difficulty
         self.players = players
@@ -117,12 +136,25 @@ class Game:
         self.pause_started_at = None
 
         start1 = (GRID_WIDTH // 4, GRID_HEIGHT // 2)
-        snake1 = Snake(start1, "UP", COLORS["snake1_head"], COLORS["snake1_body"])
+        lives = lives or []
+        snake1 = Snake(
+            start1,
+            "UP",
+            COLORS["snake1_head"],
+            COLORS["snake1_body"],
+            lives[0] if len(lives) > 0 else None,
+        )
         self.snakes.append(snake1)
 
         if players == 2:
             start2 = (3 * GRID_WIDTH // 4, GRID_HEIGHT // 2)
-            snake2 = Snake(start2, "DOWN", COLORS["snake2_head"], COLORS["snake2_body"])
+            snake2 = Snake(
+                start2,
+                "DOWN",
+                COLORS["snake2_head"],
+                COLORS["snake2_body"],
+                lives[1] if len(lives) > 1 else None,
+            )
             self.snakes.append(snake2)
 
         if difficulty == "hard":
@@ -176,6 +208,31 @@ class Game:
             self.mystery_box_active = True
         else:
             self.mystery_box_active = False
+
+    def _find_respawn_cell(self, snake):
+        occupied = self._get_occupied_cells()
+        occupied.difference_update(snake.segments)
+        if snake.start_pos not in occupied:
+            return snake.start_pos
+
+        available = [
+            (x, y)
+            for x in range(self.grid_width)
+            for y in range(self.grid_height)
+            if (x, y) not in occupied
+        ]
+        return random.choice(available) if available else None
+
+    def _handle_snake_death(self, snake):
+        self.renderer.sound_hit.play()
+        if snake.lives_remaining is not None:
+            snake.lives_remaining -= 1
+            if snake.lives_remaining > 0:
+                respawn_cell = self._find_respawn_cell(snake)
+                if respawn_cell is not None:
+                    snake.reset_after_life_loss(respawn_cell)
+                    return
+        snake.alive = False
 
     def _activate_mystery_effect(self, snake, current_time):
         effect = random.choice(["color", "fruit_pack", "speed"])
@@ -269,8 +326,7 @@ class Game:
                 and self.is_snake_invincible(self.snakes[0], current_time)
                 and s.head() in self.snakes[0].segments
             ):
-                s.alive = False
-                self.renderer.sound_hit.play()
+                self._handle_snake_death(s)
                 continue
 
             if not invincible:
@@ -279,14 +335,12 @@ class Game:
                     or s.check_self_collision()
                     or s.check_collision_with_obstacles(self.obstacles)
                 ):
-                    s.alive = False
-                    self.renderer.sound_hit.play()
+                    self._handle_snake_death(s)
                     continue
                 if self.players == 2:
                     other = self.snakes[1] if s is self.snakes[0] else self.snakes[0]
                     if s.check_collision_with_other_snake(other):
-                        s.alive = False
-                        self.renderer.sound_hit.play()
+                        self._handle_snake_death(s)
                         continue
 
         # --- Handle game‑over for AI mode (already correct) ---

@@ -30,6 +30,7 @@ def show_main_menu(renderer):
     selected_mode_idx = 0
     selected_difficulty = "normal"
     selected_ai_idx = 0
+    selected_lives = [0, 0]
 
     def build_new_game_choice():
         selected_mode = modes[selected_mode_idx]
@@ -40,7 +41,11 @@ def show_main_menu(renderer):
             "ai": selected_mode["ai"],
             "ai_type": selected_ai["id"],
             "difficulty": selected_difficulty,
+            "lives": [LIVES_OPTIONS[selected_lives[i]] for i in range(selected_mode["players"])],
         }
+
+    def lives_label(lives):
+        return "Off" if lives is None else str(lives)
 
     while True:
         renderer.clear()
@@ -77,6 +82,26 @@ def show_main_menu(renderer):
         )
         renderer.screen.blit(diff_surf, diff_rect)
         sub_y += 40
+        lives_rects = []
+        lives_count = selected_mode["players"]
+        for lives_index in range(lives_count):
+            if selected_mode["ai"] and lives_index == 1:
+                label = f"AI Lives: {lives_label(LIVES_OPTIONS[selected_lives[lives_index]])}"
+                color = COLORS["snake2_head"]
+            elif lives_count == 1:
+                label = f"Lives: {lives_label(LIVES_OPTIONS[selected_lives[lives_index]])}"
+                color = (255, 255, 255)
+            else:
+                label = f"P{lives_index + 1} Lives: {lives_label(LIVES_OPTIONS[selected_lives[lives_index]])}"
+                color = COLORS[f"snake{lives_index + 1}_head"]
+            lives_surf = renderer.font_medium.render(label, True, color)
+            lives_rect = lives_surf.get_rect(
+                center=(WINDOW_WIDTH // 2, sub_y + lives_surf.get_height() // 2)
+            )
+            renderer.screen.blit(lives_surf, lives_rect)
+            lives_rects.append((lives_index, lives_rect))
+            sub_y += 40
+
         ai_rect = None
         if selected_mode["ai"]:
             selected_ai = AI_OPTIONS[selected_ai_idx]
@@ -102,6 +127,15 @@ def show_main_menu(renderer):
                 selected_ai_idx = (selected_ai_idx + 1) % len(AI_OPTIONS)
                 renderer.sound_button.play()
                 mouse_click = False
+            else:
+                for lives_index, lives_rect in lives_rects:
+                    if lives_rect.collidepoint(clicked_pos):
+                        selected_lives[lives_index] = (
+                            selected_lives[lives_index] + 1
+                        ) % len(LIVES_OPTIONS)
+                        renderer.sound_button.play()
+                        mouse_click = False
+                        break
 
         for b in buttons:
             hover = b["rect"].collidepoint(mx, my)

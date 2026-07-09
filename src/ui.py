@@ -129,7 +129,12 @@ class Renderer:
                 if getattr(game, "ai_enabled", False) and i == 1
                 else f"P{i + 1}"
             )
-            text = f"{label} Score: {snake.score}"
+            lives_text = (
+                ""
+                if snake.lives_remaining is None
+                else f" Lives: {snake.lives_remaining}"
+            )
+            text = f"{label} Score: {snake.score}{lives_text}"
             color = (
                 snake.current_color_head(current_time)
                 if snake.alive

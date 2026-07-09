@@ -22,6 +22,7 @@ def main():
             renderer=renderer,
             ai_enabled=choice["ai"],
             ai_type=choice["ai_type"],
+            lives=choice["lives"],
         )
         last_move_time = pygame.time.get_ticks()
         game.last_mystery_box_time = last_move_time
