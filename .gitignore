@@ -5,6 +5,11 @@ snakeVenv/
 __pycache__/
 *.pyc
 
+# PyInstaller build output
+build/
+dist/
+*.spec
+
 # temp .py files
 main_1.py
 main_2.py

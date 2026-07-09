@@ -49,6 +49,26 @@ pip install -r requirements.txt
 python src/main.py
 ```
 
+## 📦 Windows Release Build
+
+`src/config.py` contains the app version:
+
+```python
+VERSION = "1.0.0"
+```
+
+Bump `VERSION` for each release, then build the Windows executable with:
+
+```bash
+pyinstaller --onefile --name SnakeGame --add-data "assets;assets" src/main.py
+```
+
+The executable is written to `dist/SnakeGame.exe`. GitHub Actions automatically
+builds and uploads this file when you push a `v*` tag, such as `v1.0.0`.
+
+Scores are stored in `scores.json` next to the executable, so replacing only
+`SnakeGame.exe` during an update preserves the scoreboard.
+
 ### 🕹️ In‑Game Controls
 
 | Key(s)          | Action                                      |

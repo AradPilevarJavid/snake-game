@@ -3,31 +3,30 @@ name: Build and Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
+
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-    - name: Install dependencies
-      run: pip install -r requirements.txt pyinstaller
+      - name: Install dependencies
+        run: pip install -r requirements.txt pyinstaller
 
-    - name: Build executable
-      run: pyinstaller --onefile --name SnakeGame --add-data "assets;assets" src/main.py
+      - name: Build executable
+        run: pyinstaller --onefile --name SnakeGame --add-data "assets;assets" src/main.py
 
-    - name: Create Release
-      id: create_release
-      uses: softprops/action-gh-release@v2
-      with:
-        files: dist/SnakeGame.exe
-        body: See CHANGELOG for details.
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/SnakeGame.exe
+          body: "Built from tag ${{ github.ref_name }}."

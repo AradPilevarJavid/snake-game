@@ -1,13 +1,16 @@
 from datetime import datetime
+import threading
 import pygame
 from config import *
 from game import Game
 import ui
 import menu
 import scoreboard
+import updater
 
 
 def main():
+    threading.Thread(target=updater.check_for_updates, daemon=True).start()
     renderer = ui.Renderer()  # the renderer class handels all the visual output
     quit_app = False
 

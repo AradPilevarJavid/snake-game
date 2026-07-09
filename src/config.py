@@ -1,3 +1,8 @@
+import os
+import sys
+
+VERSION = "1.0.0"
+
 CELL_SIZE = 31
 GRID_WIDTH = 30
 GRID_HEIGHT = 30
@@ -8,7 +13,15 @@ BASE_MOVE_DELAY = 120  # increase this number to slow the game down
 FAST_MOVE_DELAY = BASE_MOVE_DELAY / 2
 MYSTERY_BOX_INTERVAL = 10000
 EFFECT_DURATION = 5000
-SCORE_FILE = "scores.json"
+
+
+def get_app_dir():
+    if getattr(sys, "frozen", False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+SCORE_FILE = os.path.join(get_app_dir(), "scores.json")
 LIVES_OPTIONS = [None, 1, 2, 3, 5]
 
 
