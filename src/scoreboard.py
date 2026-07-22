@@ -17,8 +17,13 @@ def load_scores():
 
 
 def save_scores(scores):
-    with open(SCORE_FILE, "w") as f:
+    os.makedirs(os.path.dirname(SCORE_FILE), exist_ok=True)
+    temporary = f"{SCORE_FILE}.tmp"
+    with open(temporary, "w") as f:
         json.dump(scores, f, indent=4)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(temporary, SCORE_FILE)
 
 
 def add_score(name, score, players, result="n/a", difficulty="normal", timestamp=None):

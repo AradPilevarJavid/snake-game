@@ -1,17 +1,36 @@
 from datetime import datetime
-import threading
+import argparse
+import os
+from pathlib import Path
 import pygame
 from config import *
 from game import Game
 import ui
 import menu
 import scoreboard
-import updater
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--update-health-file")
+    parser.add_argument("--update-health-token")
+    return parser.parse_known_args()[0]
+
+
+def report_update_health(health_file, token):
+    if not health_file or not token:
+        return
+    path = Path(health_file)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    temporary.write_text(token, encoding="utf-8")
+    os.replace(temporary, path)
 
 
 def main():
-    threading.Thread(target=updater.check_for_updates, daemon=True).start()
+    args = parse_args()
     renderer = ui.Renderer()  # the renderer class handels all the visual output
+    report_update_health(args.update_health_file, args.update_health_token)
     quit_app = False
 
     while True:

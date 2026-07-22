@@ -1,5 +1,7 @@
 import os
 import sys
+from pathlib import Path
+import shutil
 
 VERSION = "1.0.0"
 
@@ -21,7 +23,40 @@ def get_app_dir():
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-SCORE_FILE = os.path.join(get_app_dir(), "scores.json")
+def get_data_dir():
+    configured = os.environ.get("SNAKE_DATA_DIR")
+    if configured:
+        data_dir = Path(configured)
+    elif getattr(sys, "frozen", False) and os.environ.get("LOCALAPPDATA"):
+        data_dir = Path(os.environ["LOCALAPPDATA"]) / "SnakeGame" / "data"
+    else:
+        data_dir = Path(get_app_dir()) / "data"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    return data_dir
+
+
+DATA_DIR = get_data_dir()
+SCORE_FILE = str(DATA_DIR / "scores.json")
+
+
+def migrate_legacy_scores():
+    destination = Path(SCORE_FILE)
+    if destination.exists():
+        return
+    candidates = [
+        Path(get_app_dir()) / "scores.json",
+        Path(sys.executable).resolve().parent / "scores.json",
+    ]
+    for candidate in candidates:
+        if candidate.is_file() and candidate != destination:
+            try:
+                shutil.copy2(candidate, destination)
+                return
+            except OSError:
+                continue
+
+
+migrate_legacy_scores()
 LIVES_OPTIONS = [None, 1, 2, 3, 5]
 
 

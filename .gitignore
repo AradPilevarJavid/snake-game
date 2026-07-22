@@ -8,7 +8,7 @@ __pycache__/
 # PyInstaller build output
 build/
 dist/
-*.spec
+SnakeGame.spec
 
 # temp .py files
 main_1.py
@@ -22,3 +22,9 @@ main_2.py
 assets/tone.wav
 assets/scores.json
 scores.json
+data/
+logs/
+.update/
+active.json
+launcher-config.json
+publish/

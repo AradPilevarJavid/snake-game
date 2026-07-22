@@ -11,6 +11,8 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      UPDATE_BASE_URL: ${{ vars.UPDATE_BASE_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -20,13 +22,108 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install -r requirements.txt pyinstaller
+        run: py -m pip install -r requirements.txt pyinstaller
 
-      - name: Build executable
-        run: pyinstaller --onefile --name SnakeGame --add-data "assets;assets" src/main.py
+      - name: Derive release version
+        id: version
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart("v")
+          if ($version -notmatch '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?$') {
+            throw "Tag must be semantic, for example v1.1.0."
+          }
+          "value=$version" >> $env:GITHUB_OUTPUT
 
-      - name: Upload release asset
+      - name: Verify source version
+        shell: pwsh
+        run: |
+          $expected = "${{ steps.version.outputs.value }}"
+          $source = Get-Content "src/config.py" -Raw
+          if ($source -notmatch 'VERSION\s*=\s*"([^"]+)"') {
+            throw "Could not find VERSION in src/config.py."
+          }
+          if ($Matches[1] -ne $expected) {
+            throw "src/config.py VERSION ($($Matches[1])) does not match tag ($expected)."
+          }
+
+      - name: Build game and launcher
+        run: |
+          pyinstaller --noconfirm --clean Snake.spec
+          pyinstaller --noconfirm --clean Launcher.spec
+
+      - name: Generate server payload and manifest
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.value }}"
+          $channelRoot = "publish/stable"
+          $releaseRoot = "$channelRoot/releases/$version"
+          New-Item -ItemType Directory -Force -Path $releaseRoot | Out-Null
+          Copy-Item -Recurse -Force "dist/Snake/*" $releaseRoot
+          py tools/build_manifest.py `
+            --payload "dist/Snake" `
+            --output "$channelRoot/version.json" `
+            --version $version `
+            --channel stable `
+            --update-mode optional `
+            --release-notes "Built from tag ${{ github.ref_name }}."
+
+      - name: Assemble first-install package
+        shell: pwsh
+        run: |
+          if (-not $env:UPDATE_BASE_URL) {
+            throw "Set the repository variable UPDATE_BASE_URL to the stable HTTPS channel URL."
+          }
+          $version = "${{ steps.version.outputs.value }}"
+          $gameRoot = "package/Game"
+          $versionRoot = "$gameRoot/versions/$version"
+          New-Item -ItemType Directory -Force -Path $versionRoot | Out-Null
+          New-Item -ItemType Directory -Force -Path "$gameRoot/data" | Out-Null
+          Copy-Item -Force "dist/Launcher.exe" "$gameRoot/Launcher.exe"
+          Copy-Item -Recurse -Force "dist/Snake/*" $versionRoot
+
+          $remoteManifest = Get-Content "publish/stable/version.json" -Raw | ConvertFrom-Json
+          $installedManifest = [ordered]@{
+            schema_version = 1
+            version = $version
+            entrypoint = $remoteManifest.entrypoint
+            files = $remoteManifest.files
+          }
+          $installedManifest | ConvertTo-Json -Depth 10 |
+            Set-Content "$versionRoot/.installed-manifest.json" -Encoding utf8
+
+          [ordered]@{
+            version = $version
+            directory = $version
+            entrypoint = $remoteManifest.entrypoint
+          } | ConvertTo-Json |
+            Set-Content "$gameRoot/active.json" -Encoding utf8
+
+          [ordered]@{
+            update_base_url = $env:UPDATE_BASE_URL.TrimEnd("/")
+            channel = "stable"
+            check_timeout_seconds = 8
+            download_timeout_seconds = 20
+            health_timeout_seconds = 30
+          } | ConvertTo-Json |
+            Set-Content "$gameRoot/launcher-config.json" -Encoding utf8
+
+          Compress-Archive -Path "$gameRoot/*" `
+            -DestinationPath "SnakeGame-$version-windows.zip"
+
+      - name: Upload deployable server tree
+        uses: actions/upload-artifact@v4
+        with:
+          name: snake-update-server-${{ steps.version.outputs.value }}
+          path: publish/stable
+
+      - name: Upload GitHub release assets
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/SnakeGame.exe
-          body: "Built from tag ${{ github.ref_name }}."
+          files: |
+            SnakeGame-${{ steps.version.outputs.value }}-windows.zip
+            publish/stable/version.json
+          body: |
+            Windows launcher package and update manifest for ${{ github.ref_name }}.
+
+            Deploy the `snake-update-server-*` workflow artifact to the configured
+            HTTPS update host. Publish payload files before replacing version.json.

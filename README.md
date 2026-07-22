@@ -49,25 +49,155 @@ pip install -r requirements.txt
 python src/main.py
 ```
 
-## 📦 Windows Release Build
+## 📦 Windows Launcher and Auto-Updates
 
-`src/config.py` contains the app version:
+The Windows release uses two independent programs:
 
-```python
-VERSION = "1.0.0"
+- `Launcher.exe` is a small, stable bootstrap that checks and installs updates.
+- `Snake.exe` is a PyInstaller `--onedir` game payload and never replaces itself.
+
+Installed releases use immutable version directories:
+
+```text
+Game/
+├── Launcher.exe
+├── launcher-config.json
+├── active.json
+├── versions/
+│   ├── 1.0.0/
+│   │   ├── Snake.exe
+│   │   ├── _internal/
+│   │   └── assets/
+│   └── 1.1.0/
+├── data/
+│   └── scores.json
+├── logs/
+└── .update/
 ```
 
-Bump `VERSION` for each release, then build the Windows executable with:
+This is safer than replacing files in the live game directory. The launcher
+builds and verifies the new directory first, then atomically switches
+`active.json`. If the new game does not report a healthy startup, the launcher
+switches the pointer back and starts the previous release.
 
-```bash
-pyinstaller --onefile --name SnakeGame --add-data "assets;assets" src/main.py
+Only files whose SHA-256 differs are downloaded. Unchanged files are hard-linked
+or copied from the installed release. New files are added automatically; files
+removed from the new manifest do not appear in the new immutable directory.
+
+### Reliability and Security
+
+- HTTPS is required for manifests and payload files.
+- Downloads use timeouts, bounded exponential retries, `.part` files, and HTTP
+  `Range` resume when the server supports it.
+- Every staged file is checked for both declared size and SHA-256.
+- Manifest paths are validated against traversal, drive paths, reserved Windows
+  names, and case-insensitive collisions.
+- Installation is completed off to the side before an atomic activation.
+- Launcher logs rotate under `logs/launcher.log`.
+- Scores are kept under `data/` and are never part of a managed release.
+- Optional updates may be skipped; mandatory releases and
+  `minimum_supported_version` cannot be skipped.
+
+HTTPS and hashes protect against transport errors, but hashes in an unsigned
+manifest do not protect against a compromised update server. For higher-risk
+distribution, add detached Ed25519 manifest signing and Authenticode-sign both
+executables before generating the manifest.
+
+### Build on Windows
+
+Install the build dependencies:
+
+```powershell
+py -m pip install -r requirements.txt pyinstaller
 ```
 
-The executable is written to `dist/SnakeGame.exe`. GitHub Actions automatically
-builds and uploads this file when you push a `v*` tag, such as `v1.0.0`.
+Build with the checked-in specifications:
 
-Scores are stored in `scores.json` next to the executable, so replacing only
-`SnakeGame.exe` during an update preserves the scoreboard.
+```powershell
+pyinstaller --noconfirm --clean Snake.spec
+pyinstaller --noconfirm --clean Launcher.spec
+```
+
+The game specification creates the complete onedir payload under
+`dist/Snake/`. The launcher is a separate windowed executable. Copy
+`launcher-config.example.json` to `launcher-config.json` and replace
+`update_base_url` with the HTTPS base URL of the update channel.
+
+Do not publish only `Snake.exe`: PyInstaller's `_internal/` files are part of the
+managed release and must be uploaded and hashed too.
+
+### Update Server Layout
+
+For a stable channel hosted at `https://updates.example.com/snake/stable`:
+
+```text
+stable/
+├── version.json
+└── releases/
+    ├── 1.0.0/
+    │   ├── Snake.exe
+    │   ├── _internal/
+    │   └── assets/
+    └── 1.1.0/
+        ├── Snake.exe
+        ├── _internal/
+        └── assets/
+```
+
+Example manifest:
+
+```json
+{
+  "schema_version": 1,
+  "version": "1.1.0",
+  "channel": "stable",
+  "update_mode": "optional",
+  "minimum_supported_version": null,
+  "release_notes": "Improved AI and a new apple sprite.",
+  "entrypoint": "Snake.exe",
+  "files": {
+    "Snake.exe": {
+      "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "size": 123456
+    }
+  }
+}
+```
+
+Generate it from a completed, signed game payload:
+
+```powershell
+py tools/build_manifest.py `
+  --payload dist/Snake `
+  --output publish/stable/version.json `
+  --version 1.1.0 `
+  --channel stable `
+  --update-mode optional `
+  --release-notes "Improved AI and a new apple sprite."
+```
+
+Upload the complete `dist/Snake/` directory to
+`stable/releases/1.1.0/`. Upload `version.json` last so clients never see a
+manifest before all referenced files are available. The server must support
+normal HTTPS static-file hosting; byte-range support enables resume.
+
+### Publishing Version 1.1 After 1.0
+
+1. Change the game and update `VERSION` in `src/config.py` to `1.1.0`.
+2. Build and test `Snake.spec` on Windows.
+3. Authenticode-sign release executables if code signing is configured.
+4. Generate `version.json` from the final signed `dist/Snake/` bytes.
+5. Upload the payload to `releases/1.1.0/`.
+6. Upload the new channel `version.json` last.
+7. Keep `releases/1.0.0/` available while clients may still need rollback.
+
+To force the release, use `--update-mode mandatory`. To require older clients
+to update while leaving the release generally optional, also set
+`--minimum-supported-version`, for example `1.0.1`.
+
+The launcher itself is intentionally excluded from normal payload manifests.
+A future launcher update should use a separate immutable bootstrap/helper,
+because Windows cannot safely replace the running `Launcher.exe`.
 
 ### 🕹️ In‑Game Controls
 
@@ -102,16 +232,26 @@ In the scoreboard, click **Return** or press **Esc** to go back.
 ├── README.md
 ├── assets/
 │   └── tone.wav
-├── scores.json
+├── launcher-config.example.json
 ├── requirements.txt
+├── tests/
+│   └── test_updater.py
+├── tools/
+│   └── build_manifest.py
 └── src/
     ├── ai.py
     ├── config.py
     ├── game.py
+    ├── downloader.py
+    ├── hashing.py
+    ├── installer.py
+    ├── launcher.py
     ├── main.py
     ├── menu.py
     ├── scoreboard.py
-    └── ui.py
+    ├── ui.py
+    ├── update_checker.py
+    └── version.py
 ```
 
 ## ⚙️ For Pro Users
