@@ -140,3 +140,4 @@ jobs:
 
             Deploy the `snake-update-server-*` workflow artifact to the configured
             HTTPS update host. Publish payload files before replacing version.json.
+
