@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 import shutil
 
-VERSION = "1.2.0"
+VERSION = "1.2.3"
 
 CELL_SIZE = 31
 GRID_WIDTH = 30
