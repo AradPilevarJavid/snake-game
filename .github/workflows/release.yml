@@ -12,7 +12,7 @@ jobs:
   build:
     runs-on: windows-latest
     env:
-      UPDATE_BASE_URL: ${{ vars.UPDATE_BASE_URL }}
+      UPDATE_BASE_URL: ""
 
     steps:
       - uses: actions/checkout@v4
