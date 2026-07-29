@@ -287,7 +287,8 @@ Feel free to experiment! All changes are safe – just restart the game to see t
 2. BFS (Smart): BFS turns the whole board into a graph where each node is connected to four other nodes.Every time the AI snake wants to make a move it searches one neighbor at a time.it goes so on so forth so it finds the fruit.Because it explores the grid level by level, the first time it hits the fruit is guaranteed to be the shortest route possible.
 
 ## Roadmap(TODO):
-- [ ] better gui(implement head of the snake and hearts)
+- [ ] Implement a online mode and deploy the project.
+- [ ] better GUI(implement head of the snake and hearts)
 - [ ] better and more realistic sounds
 - [ ] use blender to inhance the gui
 - [ ] auto updater for windows users.(If you are a linux user, don't worry.You are a pro you don't need it)
