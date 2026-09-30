@@ -1,5 +1,7 @@
 # Virtual environment
 snakeVenv/
+venv/
+
 
 # Python cache
 __pycache__/
@@ -28,3 +30,8 @@ logs/
 active.json
 launcher-config.json
 publish/
+
+
+# coding dairy
+authentic
+
