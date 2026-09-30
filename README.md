@@ -112,7 +112,7 @@ executables before generating the manifest.
 Install the build dependencies:
 
 ```powershell
-py -m pip install -r requirements.txt pyinstaller
+py -m pip install -r requirements.txt pyinstaller==6.22.3
 ```
 
 Build with the checked-in specifications:

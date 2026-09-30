@@ -1,4 +1,4 @@
-﻿name: Build and Release
+name: Build and Release
 
 on:
   push:
@@ -12,22 +12,29 @@ jobs:
   build:
     runs-on: windows-latest
     env:
-      UPDATE_BASE_URL: ""
+      UPDATE_BASE_URL: ${{ vars.UPDATE_BASE_URL }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out source
+        uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python 3.14
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.14"
+          cache: pip
 
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip wheel setuptools
-
-      - name: Install dependencies
+      - name: Install build dependencies
         run: |
-          python -m pip install --only-binary :all: -r requirements.txt pyinstaller
+          python -m pip install --upgrade pip
+          python -m pip install --only-binary=:all: -r requirements.txt pyinstaller==6.22.3
+
+      - name: Verify pygame installation
+        run: |
+          python -c "import pygame; expected = '2.5.8'; actual = pygame.version.ver; print(f'pygame-ce {actual}'); raise SystemExit(f'Expected pygame-ce {expected}, got {actual}') if actual != expected else None"
+
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
 
       - name: Derive release version
         id: version
@@ -64,7 +71,6 @@ jobs:
           $releaseRoot = "$channelRoot/releases/$version"
 
           New-Item -ItemType Directory -Force -Path $releaseRoot | Out-Null
-
           Copy-Item -Recurse -Force "dist/Snake/*" $releaseRoot
 
           py tools/build_manifest.py `
@@ -140,4 +146,3 @@ jobs:
 
             Deploy the `snake-update-server-*` workflow artifact to the configured
             HTTPS update host. Publish payload files before replacing version.json.
-
