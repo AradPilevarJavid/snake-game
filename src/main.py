@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import argparse
 import os
 from pathlib import Path
@@ -85,7 +85,7 @@ def main():
                         score_snakes = (
                             game.snakes[:1] if game.ai_enabled else game.snakes
                         )
-                        timestamp = datetime.utcnow().isoformat()
+                        timestamp = datetime.now(timezone.utc).isoformat()
                         for snake_index, snake in enumerate(score_snakes):
                             if snake.score > 0:
                                 name = renderer.get_name_input()

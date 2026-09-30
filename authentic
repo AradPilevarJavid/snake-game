@@ -1,0 +1,3 @@
+a version mismatch problem occured. I tried to solve it by downloading different pygame versions. Id didn't work out.
+to solve the problem I could downgrade python to 3.13
+at the end I decided to update the code so that it supports the newer python version.

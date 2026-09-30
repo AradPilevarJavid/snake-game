@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from config import *
 import pygame
 
@@ -34,7 +34,7 @@ def add_score(name, score, players, result="n/a", difficulty="normal", timestamp
         "players": players,
         "result": result,
         "difficulty": difficulty,
-        "timestamp": timestamp or datetime.utcnow().isoformat(),
+        "timestamp": timestamp or datetime.now(timezone.utc).isoformat(),
     }
     scores.append(entry)
     scores.sort(key=lambda x: x["score"], reverse=True)

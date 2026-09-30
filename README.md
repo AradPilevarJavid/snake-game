@@ -34,13 +34,13 @@ It includes single‑player, two‑player, **Player vs AI** modes, selectable di
 
 ## 📋 Requirements
 
-- 🐍 Python 3.x
-- 🎮 Pygame
+- 🐍 CPython 3.14.7 (3.14.x)
+- 🎮 pygame-ce 2.5.8
 
 Install dependencies:
 
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 ## 🚀 Running
@@ -48,6 +48,10 @@ pip install -r requirements.txt
 ```bash
 python src/main.py
 ```
+
+The dependency is installed as `pygame-ce` but is imported by the game as
+`pygame`. Version 2.5.8 provides prebuilt wheels for CPython 3.14 on the
+supported desktop platforms, so a compiler is not required.
 
 ## 📦 Windows Launcher and Auto-Updates
 
