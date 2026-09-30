@@ -295,7 +295,7 @@ Feel free to experiment! All changes are safe – just restart the game to see t
 - [ ] better GUI(implement head of the snake and hearts)
 - [ ] better and more realistic sounds
 - [ ] use blender to inhance the gui
-- [ ] auto updater for windows users.(If you are a linux user, don't worry.You are a pro you don't need it)
+- [ ] updater and installer.
 - [ ] improve the assets(sounds, sprites, music, fonts, etc)
 
 
