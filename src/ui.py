@@ -23,7 +23,14 @@ class Renderer:
     def __init__(self):
         pygame.init()
         pygame.mixer.init()
-        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.screen = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.display = pygame.display.set_mode(
+            (WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE
+        )
+        self.window_size = self.display.get_size()
+        self.scale = 1.0
+        self.viewport = pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
+        self._update_viewport(self.window_size)
         pygame.display.set_caption("Snake Game")
         self.clock = pygame.time.Clock()
         self.font_small = pygame.font.Font(None, 24)
@@ -33,6 +40,50 @@ class Renderer:
         self.sound_hit = generate_tone(200, 0.3)
         self.sound_mystery = generate_tone(500, 0.2)
         self.sound_button = generate_tone(1000, 0.05)
+
+    def _update_viewport(self, window_size):
+        window_width = max(1, int(window_size[0]))
+        window_height = max(1, int(window_size[1]))
+        self.window_size = (window_width, window_height)
+        self.scale = min(
+            window_width / WINDOW_WIDTH,
+            window_height / WINDOW_HEIGHT,
+        )
+        viewport_width = max(1, round(WINDOW_WIDTH * self.scale))
+        viewport_height = max(1, round(WINDOW_HEIGHT * self.scale))
+        self.viewport = pygame.Rect(
+            (window_width - viewport_width) // 2,
+            (window_height - viewport_height) // 2,
+            viewport_width,
+            viewport_height,
+        )
+
+    def handle_event(self, event):
+        if event.type == pygame.VIDEORESIZE:
+            width = max(1, event.w)
+            height = max(1, event.h)
+            self.display = pygame.display.set_mode(
+                (width, height), pygame.RESIZABLE
+            )
+            self._update_viewport((width, height))
+            return True
+        if event.type == pygame.WINDOWSIZECHANGED:
+            self._update_viewport(self.display.get_size())
+            return True
+        return False
+
+    def to_logical_pos(self, physical_pos):
+        x, y = physical_pos
+        if not self.viewport.collidepoint(x, y):
+            return None
+        logical_x = int((x - self.viewport.x) / self.scale)
+        logical_y = int((y - self.viewport.y) / self.scale)
+        if logical_x >= WINDOW_WIDTH or logical_y >= WINDOW_HEIGHT:
+            return None
+        return logical_x, logical_y
+
+    def get_logical_mouse_pos(self):
+        return self.to_logical_pos(pygame.mouse.get_pos())
 
     def draw_grid(self):
         for x in range(0, WINDOW_WIDTH, CELL_SIZE):
@@ -242,6 +293,11 @@ class Renderer:
         self.screen.fill(COLORS["bg"])
 
     def update_display(self):
+        self.display.fill(COLORS["bg"])
+        scaled_screen = pygame.transform.smoothscale(
+            self.screen, self.viewport.size
+        )
+        self.display.blit(scaled_screen, self.viewport.topleft)
         pygame.display.flip()
         self.clock.tick(FPS)
 
@@ -262,6 +318,7 @@ class Renderer:
             )
             self.update_display()
             for event in pygame.event.get():
+                self.handle_event(event)
                 if event.type == pygame.QUIT:
                     return None
                 if event.type == pygame.KEYDOWN:

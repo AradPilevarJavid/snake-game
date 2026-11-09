@@ -49,19 +49,21 @@ def show_main_menu(renderer):
 
     while True:
         renderer.clear()
-        mx, my = pygame.mouse.get_pos()
+        mouse_pos = renderer.get_logical_mouse_pos()
         mouse_click = False
         clicked_pos = None
 
         for event in (
             pygame.event.get()
         ):  # returns a list of event objects.each event object has a type atr
+            if renderer.handle_event(event):
+                continue
             if event.type == pygame.QUIT:
                 return None
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    mouse_click = True
-                    clicked_pos = event.pos
+                    clicked_pos = renderer.to_logical_pos(event.pos)
+                    mouse_click = clicked_pos is not None
 
         title = renderer.font_large.render("SNAKE GAME", True, (100, 255, 100))
         renderer.screen.blit(title, (WINDOW_WIDTH // 2 - title.get_width() // 2, 30))
@@ -138,7 +140,7 @@ def show_main_menu(renderer):
                         break
 
         for b in buttons:
-            hover = b["rect"].collidepoint(mx, my)
+            hover = mouse_pos is not None and b["rect"].collidepoint(mouse_pos)
             renderer.draw_button(b["rect"], b["text"], hover)
             if mouse_click and hover:
                 renderer.sound_button.play()
