@@ -74,7 +74,7 @@ def show_scoreboard(renderer):
 
     while running:
         renderer.clear()
-        mx, my = pygame.mouse.get_pos()
+        mouse_pos = renderer.get_logical_mouse_pos()
 
         # the render function turns text into a image-like object.
         # blit = bit block transfer.
@@ -184,10 +184,14 @@ def show_scoreboard(renderer):
 
         return_rect = pygame.Rect(0, 0, 200, 60)
         return_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT - 55)
-        return_hover = return_rect.collidepoint(mx, my)
+        return_hover = (
+            mouse_pos is not None and return_rect.collidepoint(mouse_pos)
+        )
         renderer.draw_button(return_rect, "Return", return_hover)
 
         for event in pygame.event.get():
+            if renderer.handle_event(event):
+                continue
             if event.type == pygame.QUIT:
                 return False
             if event.type == pygame.KEYDOWN:
@@ -195,7 +199,10 @@ def show_scoreboard(renderer):
                     return True
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    if return_rect.collidepoint(event.pos):
+                    logical_pos = renderer.to_logical_pos(event.pos)
+                    if logical_pos is not None and return_rect.collidepoint(
+                        logical_pos
+                    ):
                         return True
 
         renderer.update_display()

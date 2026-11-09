@@ -30,6 +30,7 @@ It includes single‑player, two‑player, **Player vs AI** modes, selectable di
   - ⚡ **Speed boost** – move twice as fast
 - 🏆 **Hall of Fame** – top 10 scores saved locally, with 🥇🥈🥉 medals and 1P/2P badges
 - 🔊 **Procedural sound** – no external audio files needed
+- 🖥️ **Responsive window** – the 930×990 logical game canvas scales uniformly and stays centered when the window is resized
 - 🏁 Win by filling the entire board
 
 ## 📋 Requirements

@@ -53,6 +53,8 @@ def main():
         while running:
             current_time = pygame.time.get_ticks()
             for event in pygame.event.get():
+                if renderer.handle_event(event):
+                    continue
                 if event.type == pygame.QUIT:  # if window close button is clicked.
                     running = False
                     break
